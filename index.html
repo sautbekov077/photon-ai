@@ -399,6 +399,7 @@
         </div>
 
         <button class="generate-btn" type="button">Генерировать</button>
+        <p id="status-msg" style="text-align:center;font-size:13px;color:#555;margin-top:10px;display:none;"></p>
       </div>
     </main>
   </div>
@@ -446,6 +447,87 @@
           flip();
         }
       });
+    });
+
+    // ---------------------------------------------------------------------------
+    // Generate button – collect form values and POST to /generate
+    // ---------------------------------------------------------------------------
+    const API_BASE = 'http://localhost:8000';
+
+    const STYLE_MAP  = { 'Formal': 'formal', 'Creative': 'creative', 'Pitch': 'pitch' };
+    const LANG_MAP   = { 'Қазақша': 'kz', 'Русский': 'ru', 'English': 'en' };
+    const SIZE_MAP   = { 'Стандарт': 'standard', 'Detailed': 'detailed' };
+    const FORMAT_MAP = { 'PDF': 'pdf', 'PPTX': 'pptx' };
+
+    function getActiveSegment(control) {
+      return control.querySelector('.segment.active')?.textContent.trim() ?? '';
+    }
+
+    const segmentedControls = document.querySelectorAll('[data-segmented]');
+    const [styleControl, langControl, sizeControl, formatControl] = segmentedControls;
+
+    document.querySelector('.generate-btn').addEventListener('click', async () => {
+      const topic = document.querySelector('.topic-input').value.trim();
+      if (!topic) {
+        alert('Пожалуйста, введите тему презентации.');
+        return;
+      }
+
+      const slidesCount = parseInt(document.querySelector('.slide-count-select').value, 10);
+      const style       = STYLE_MAP[getActiveSegment(styleControl)]  ?? 'formal';
+      const language    = LANG_MAP[getActiveSegment(langControl)]     ?? 'ru';
+      const contentSize = SIZE_MAP[getActiveSegment(sizeControl)]     ?? 'standard';
+      const includeImgs = document.querySelector('[data-toggle]').getAttribute('aria-checked') === 'true';
+      const format      = FORMAT_MAP[getActiveSegment(formatControl)] ?? 'pdf';
+
+      const payload = {
+        topic,
+        slides_count:   slidesCount,
+        style,
+        language,
+        content_size:   contentSize,
+        include_images: includeImgs,
+        format,
+      };
+
+      const btn    = document.querySelector('.generate-btn');
+      const status = document.getElementById('status-msg');
+
+      btn.disabled    = true;
+      btn.textContent = 'Генерация…';
+      status.style.display = 'block';
+      status.textContent   = 'Создание структуры и контента…';
+
+      try {
+        const response = await fetch(`${API_BASE}/generate`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.detail ?? `Ошибка ${response.status}`);
+        }
+
+        status.textContent = 'Экспорт файла…';
+        const blob     = await response.blob();
+        const url      = URL.createObjectURL(blob);
+        const anchor   = document.createElement('a');
+        anchor.href     = url;
+        anchor.download = format === 'pdf' ? 'presentation.pdf' : 'presentation.pptx';
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+        status.textContent = '✅ Готово! Файл скачан.';
+      } catch (err) {
+        status.textContent = '';
+        alert(`Не удалось создать презентацию:\n${err.message}`);
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = 'Генерировать';
+      }
     });
   </script>
 </body>

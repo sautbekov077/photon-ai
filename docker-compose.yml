@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  image_service:
+    build:
+      context: ./image_service
+      dockerfile: Dockerfile
+    container_name: photon-image-service
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  main_api:
+    build:
+      context: ./main_api
+      dockerfile: Dockerfile
+    container_name: photon-main-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - IMAGE_SERVICE_URL=http://image_service:8001
+    depends_on:
+      - image_service
+    restart: unless-stopped
