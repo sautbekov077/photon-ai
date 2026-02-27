@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+groq
+python-pptx
+reportlab
+python-multipart
+python-dotenv
+httpx

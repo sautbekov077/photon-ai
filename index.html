@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photon AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #5b9bd5;
+      --accent-dark: #3a78b5;
+      --accent-light: #e8f2fb;
+      --accent-glow: rgba(91, 155, 213, 0.25);
+      --bg-page: #eef2f7;
+      --bg-card: #ffffff;
+      --bg-input: #f5f8fc;
+      --bg-section: #f0f4f9;
+      --border: #dde5ef;
+      --border-focus: #5b9bd5;
+      --text-primary: #1a2638;
+      --text-secondary: #5a6e87;
+      --text-muted: #9aaabf;
+      --radius-card: 32px;
+      --radius-input: 14px;
+      --radius-pill: 999px;
+      --shadow-card: 0 20px 60px rgba(60, 100, 150, 0.12), 0 4px 16px rgba(60, 100, 150, 0.08);
+      --shadow-input: 0 2px 8px rgba(60, 100, 150, 0.06);
+      --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      background: var(--bg-page);
+      background-image:
+        radial-gradient(ellipse 70% 40% at 15% 5%, rgba(91,155,213,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 35% at 85% 95%, rgba(120,160,220,0.1) 0%, transparent 60%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-primary);
+    }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ─── APP CARD ─── */
+    .app-container {
+      width: 440px;
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      animation: fadeInUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── HEADER ─── */
+    .header {
+      padding: 32px 28px 28px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(160deg, #f0f6fd 0%, #e8f0fa 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -40px; left: 50%;
+      transform: translateX(-50%);
+      width: 300px; height: 120px;
+      background: radial-gradient(ellipse, rgba(91,155,213,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Место под логотип */
+    .logo-placeholder {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      border: 2px dashed #b8cfe8;
+      background: rgba(91,155,213,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: #9ab8d4;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      cursor: default;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+    .logo-placeholder svg {
+      width: 22px; height: 22px;
+      opacity: 0.5;
+      background-image: url('LOGO.PNG');
+    }
+
+    .header-text {
+      text-align: center;
+    }
+    .header-text h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+    }
+    .header-text p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    /* ─── CONTENT ─── */
+    .content { padding: 26px 24px 30px; display: flex; flex-direction: column; gap: 18px; }
+
+    /* ─── INPUT GROUP ─── */
+    .input-group { display: flex; flex-direction: column; gap: 8px; }
+
+    .input-group label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: var(--text-muted);
+      padding-left: 3px;
+    }
+
+    /* ─── TEXT INPUTS ─── */
+    .topic-input, .slide-count-input {
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-input);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      outline: none;
+      transition: var(--transition);
+      box-shadow: var(--shadow-input);
+    }
+    .topic-input::placeholder { color: var(--text-muted); font-weight: 400; }
+    .slide-count-input { -moz-appearance: textfield; }
+    .slide-count-input::-webkit-outer-spin-button,
+    .slide-count-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .topic-input:focus, .slide-count-input:focus {
+      border-color: var(--border-focus);
+      background: #fff;
+      box-shadow: 0 0 0 3px var(--accent-glow), var(--shadow-input);
+    }
+    .topic-input.error {
+      border-color: #e05c5c;
+      box-shadow: 0 0 0 3px rgba(224, 92, 92, 0.15);
+    }
+
+    /* ─── SEGMENTED CONTROLS ─── */
+    .segmented-control {
+      display: flex;
+      background: var(--bg-section);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-input);
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .segment {
+      flex: 1;
+      text-align: center;
+      padding: 9px 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 10px;
+      transition: var(--transition);
+      user-select: none;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+    .segment:hover:not(.active) {
+      color: var(--text-secondary);
+      background: rgba(91,155,213,0.07);
+    }
+    .segment.active {
+      background: #ffffff;
+      color: var(--accent-dark);
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(60,100,150,0.12), 0 1px 3px rgba(60,100,150,0.08);
+    }
+
+    /* ─── THEME CAPSULES ─── */
+    .themes-container {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 2px;
+      scrollbar-width: none;
+    }
+    .themes-container::-webkit-scrollbar { display: none; }
+
+    .theme-capsule {
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+      border: 2px solid transparent;
+      opacity: 0.7;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      flex-shrink: 0;
+    }
+    .theme-capsule:hover { opacity: 0.9; transform: translateY(-2px); }
+    .theme-capsule.active {
+      opacity: 1;
+      transform: translateY(-2px) scale(1.04);
+      border-color: rgba(255,255,255,0.7);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+    }
+
+    /* ─── RANGE SLIDER ─── */
+    .range-wrapper { display: flex; flex-direction: column; gap: 6px; }
+    .range-top-row { display: flex; align-items: center; gap: 8px; }
+    .range-value-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-dark);
+      background: var(--accent-light);
+      padding: 3px 9px;
+      border-radius: 20px;
+      border: 1px solid #c5dcf0;
+      min-width: 40px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .range-labels { display: flex; justify-content: space-between; }
+    .range-labels span { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+
+    .range-input {
+      width: 100%;
+      cursor: pointer;
+      accent-color: var(--accent);
+      height: 4px;
+    }
+
+    /* ─── ROW FLEX ─── */
+    .row-flex { display: flex; gap: 14px; }
+    .row-flex > .input-group { flex: 1; min-width: 0; }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border) 20%, var(--border) 80%, transparent);
+    }
+
+    /* ─── GENERATE BUTTON ─── */
+    .generate-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-input);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 8px 24px var(--accent-glow), 0 2px 6px rgba(58,120,181,0.2);
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.3px;
+    }
+    .generate-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    .generate-btn:hover::before { opacity: 1; }
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px var(--accent-glow), 0 4px 12px rgba(58,120,181,0.25);
+    }
+    .generate-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    .generate-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ─── SPINNER ─── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-content { display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    .hidden { display: none !important; }
+
+    /* ─── FOOTER NOTE ─── */
+    .footer-note {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-text">
+        <h1>Photon AI</h1>
+        <p>Генератор презентаций</p>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <div class="input-group">
+        <label>Тема презентации</label>
+        <input type="text" class="topic-input" placeholder="О чем будет презентация?" />
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="input-group">
+        <label>Язык генерации</label>
+        <div class="segmented-control lang-segment" data-segmented>
+          <div class="segment active" data-val="Русский">Русский</div>
+          <div class="segment" data-val="Қазақша">Қазақша</div>
+          <div class="segment" data-val="English">English</div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Режим дизайна</label>
+        <div class="segmented-control mode-segment" data-segmented>
+          <div class="segment" data-val="minimal">Minimal</div>
+          <div class="segment" data-val="corporate">Corporate</div>
+          <div class="segment active" data-val="creative">Creative</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      
+      <div class="input-group">
+        <label>Цветовая тема</label>
+        <div class="themes-container" id="themesContainer">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Детализация + Стиль текста -->
+      <div class="row-flex">
+        <div class="input-group">
+          <label>Детализация</label>
+          <div class="segmented-control size-segment" data-segmented>
+            <div class="segment active" data-val="Standard">Std</div>
+            <div class="segment" data-val="Detailed">Max</div>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Стиль текста</label>
+          <div class="segmented-control style-segment" data-segmented>
+            <div class="segment active" data-val="Formal">Formal</div>
+            <div class="segment" data-val="Creative">Creative</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Слайды + Вариативность -->
+      <div class="row-flex">
+        <div class="input-group">
+          <label>Слайды (5–15)</label>
+          <input type="number" class="slide-count-input" min="5" max="15" value="8" />
+        </div>
+        <div class="input-group">
+          <label>Вариативность</label>
+          <div class="range-wrapper">
+            <div class="range-top-row">
+              <input type="range" class="range-input" id="randomness" min="0" max="100" value="60">
+              <span class="range-value-badge" id="rangeValueBadge">60</span>
+            </div>
+            <div class="range-labels">
+              <span>Точно</span>
+              <span>Свободно</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Формат экспорта -->
+      <div class="input-group">
+        <label>Формат экспорта</label>
+        <div class="segmented-control format-segment" data-segmented>
+          <div class="segment active" data-val="PDF">PDF</div>
+          <div class="segment" data-val="PPTX">PPTX</div>
+        </div>
+      </div>
+
+      <!-- Кнопка генерации -->
+      <button class="generate-btn" type="button">
+        <div class="btn-content">
+          <span class="spinner hidden" id="btnSpinner"></span>
+          <span id="btnLabel">Создать шедевр</span>
+        </div>
+      </button>
+
+      <p class="footer-note">Powered by Photon AI · 2025</p>
+
+    </main>
+  </div>
+
+  <script>
+    let selectedThemeId = "modern-blue";
+
+    // ─── Range slider — live badge ───
+    const rangeInput = document.getElementById('randomness');
+    const rangeBadge = document.getElementById('rangeValueBadge');
+    rangeInput.addEventListener('input', () => { rangeBadge.textContent = rangeInput.value; });
+
+    // ─── Загрузка тем с /themes ───
+    fetch('/themes')
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('themesContainer');
+        data.themes.forEach(t => {
+          const cap = document.createElement('div');
+          cap.className = 'theme-capsule' + (t.id === selectedThemeId ? ' active' : '');
+          cap.style.backgroundColor = t.primary;
+          cap.style.color = t.text_dark || '#fff';
+          cap.innerText = t.name;
+          cap.onclick = () => {
+            document.querySelectorAll('.theme-capsule').forEach(c => c.classList.remove('active'));
+            cap.classList.add('active');
+            selectedThemeId = t.id;
+          };
+          container.appendChild(cap);
+        });
+      })
+      .catch(err => console.error("API тем недоступен. Используется тема по умолчанию.", err));
+
+    // ─── Сегментированные контролы ───
+    document.querySelectorAll('[data-segmented]').forEach(control => {
+      control.addEventListener('click', (e) => {
+        const seg = e.target.closest('.segment');
+        if (!seg) return;
+        control.querySelectorAll('.segment').forEach(s => s.classList.remove('active'));
+        seg.classList.add('active');
+      });
+    });
+
+    // ─── Получить активное значение сегмента ───
+    const getActiveValue = (selector) => {
+      const el = document.querySelector(`${selector} .active`);
+      if (!el) return "";
+      return el.getAttribute('data-val') || el.innerText;
+    };
+
+    // ─── Кнопка: UI состояния ───
+    const btn = document.querySelector('.generate-btn');
+    const btnLabel = document.getElementById('btnLabel');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const topicInput = document.querySelector('.topic-input');
+
+    function setLoading(loading) {
+      btn.disabled = loading;
+      btnSpinner.classList.toggle('hidden', !loading);
+      btnLabel.textContent = loading ? 'Магия в процессе...' : 'Создать шедевр';
+    }
+
+    // ─── Генерация ───
+    btn.addEventListener('click', async () => {
+      const topic = topicInput.value.trim();
+
+      // Валидация темы с подсветкой поля
+      if (!topic) {
+        topicInput.classList.add('error');
+        topicInput.focus();
+        setTimeout(() => topicInput.classList.remove('error'), 2500);
+        return;
+      }
+
+      // Валидация количества слайдов
+      let slideCount = parseInt(document.querySelector('.slide-count-input').value);
+      if (isNaN(slideCount) || slideCount < 5) slideCount = 5;
+      if (slideCount > 15) slideCount = 15;
+      document.querySelector('.slide-count-input').value = slideCount;
+
+      const requestBody = {
+        topic: topic,
+        slides_count: slideCount,
+        style: getActiveValue('.style-segment') || "Formal",
+        language: getActiveValue('.lang-segment') || "Русский",
+        content_size: getActiveValue('.size-segment') || "Standard",
+        include_images: false,
+        format: getActiveValue('.format-segment') || "PDF",
+        design_theme: selectedThemeId || "modern-blue",
+        design_mode: getActiveValue('.mode-segment') || "creative",
+        design_randomness: parseInt(rangeInput.value) || 50
+      };
+
+      setLoading(true);
+
+      try {
+        const res = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (!res.ok) {
+          let errorMsg = "Неизвестная ошибка сервера";
+          try {
+            const errData = await res.json();
+            errorMsg = errData.detail || JSON.stringify(errData);
+          } catch(e) {}
+          throw new Error(`Ошибка ${res.status}: ${errorMsg}`);
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `photon_presentation_${requestBody.language}.${requestBody.format.toLowerCase()}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        alert("ОШИБКА:\n" + err.message);
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>
