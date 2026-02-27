@@ -565,7 +565,7 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `photon_presentation_${requestBody.language}.${requestBody.format.toLowerCase()}`;
+        a.download = `Презентация_${requestBody.language}.${requestBody.format.toLowerCase()}`;
         document.body.appendChild(a);
         a.click();
         a.remove();
