@@ -1,3 +1,4 @@
+![Preview](logo.PNG)
 ### 🌟 Photon AI | Презентация генераторы
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)
